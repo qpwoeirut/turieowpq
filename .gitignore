@@ -1,0 +1,7 @@
+#turieowpq-bot
+
+venv
+.env
+__pycache__
+.idea
+log.txt
