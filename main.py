@@ -34,6 +34,8 @@ WORDS = ["scary", "lel", "lol", "aiya", "bruh", "breh", "oop", "<:notlikeduck:76
          "<:tourist_mad:764579517515300914>", "<:confus:764579516755738664>", "<:foncus:766364807732527114>"]
 EMOTES = [":notlikeduck:", ":tourist_mad:", ":confus:", ":foncus:"]
 WORD_CHANCE = int(len(WORDS) * 1.25)
+COWWIN = ["galen colin", "colin galen", "calen golin", "golin calen", "cowwin", "galen", "colin", "calin golin"]
+COWWIN.extend([x.replace(' ', '_') for x in COWWIN if ' ' in x)
 
 
 @client.event
@@ -43,7 +45,9 @@ async def on_message(message):
     #with open("log.txt", 'a') as f:
     #print(f"{message.author} said: {message.content}", file=f)
     msg = message.content.lower();
-    if any([emote in msg for emote in itertools.chain(EMOTES, WORDS)]):
+    if message.author.id == 145266128363585536 and "try" in msg and "again" in msg:
+        reply = random.choice(COWWIN)
+    else if any([emote in msg for emote in itertools.chain(EMOTES, WORDS)]):
         #print("word matched", file=f)
         idx = random.randint(0, WORD_CHANCE - 1)
         if idx < len(WORDS):
