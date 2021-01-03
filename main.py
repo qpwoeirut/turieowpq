@@ -46,7 +46,7 @@ async def on_message(message):
     #with open("log.txt", 'a') as f:
     #print(f"{message.author} said: {message.content}", file=f)
     msg = message.content.lower();
-    if message.author.id == 145266128363585536 and msg in COLIN_ORZ:
+    if message.author.id == 145266128363585536 and any([msg in orz for orz in COLIN_ORZ]):
         reply = random.choice(COWWIN)
     elif any([emote in msg for emote in itertools.chain(EMOTES, WORDS)]):
         #print("word matched", file=f)
