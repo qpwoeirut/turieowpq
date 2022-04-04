@@ -1,4 +1,3 @@
-# https://medium.com/better-programming/coding-a-discord-bot-with-python-64da9d6cade7
 
 
 # SOLVE aiohttp.client_exceptions.ClientConnectorCertificateError
@@ -7,7 +6,7 @@
 from discord.ext import commands
 
 from get_token import DISCORD_TOKEN
-from music import Music
+from Music import MusicCog
 from spammer import spam
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or("turi "),
@@ -33,5 +32,5 @@ async def on_message(message):
 
 
 if __name__ == '__main__':
-    client.add_cog(Music(client))
+    client.add_cog(MusicCog(client))
     client.run(DISCORD_TOKEN)
