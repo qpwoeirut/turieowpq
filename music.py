@@ -26,7 +26,7 @@ class MusicPlayer:
     When the bot disconnects from the vc its instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'volume')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'volume', 'loop_song', 'loop_queue')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -40,6 +40,9 @@ class MusicPlayer:
         self.volume = .5
         self.current = None
 
+        self.loop_song = False
+        self.loop_queue = False
+
         ctx.bot.loop.create_task(self.player_loop())
 
     async def player_loop(self):
@@ -48,33 +51,35 @@ class MusicPlayer:
         while not self.bot.is_closed():
             self.next.clear()
 
-            try:
-                # Wait for the next song. If we timeout cancel the player and disconnect...
-                async with timeout(5 * 60):  # 5 minutes
-                    source = await self.queue.get()
-            except asyncio.TimeoutError:
-                return self.destroy(self._guild)
-
-            if not isinstance(source, YTDLSource):
-                # Source was probably a stream (not downloaded)
-                # So we should regather to prevent stream expiration
+            if self.current is None or self.loop_song is False:
                 try:
-                    source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
-                except Exception as e:
-                    await self._channel.send(f'There was an error processing your song.\n'
-                                             f'```css\n[{e}]\n```')
-                    continue
+                    # Wait for the next song. If we timeout cancel the player and disconnect...
+                    async with timeout(5 * 60):  # 5 minutes
+                        source = await self.queue.get()
+                        if self.loop_queue:
+                            await self.queue.put(source)
+                except asyncio.TimeoutError:
+                    return self.destroy(self._guild)
 
-            source.volume = self.volume
-            self.current = source
+                if not isinstance(source, YTDLSource):
+                    # Source was probably a stream (not downloaded)
+                    # So we should regather to prevent stream expiration
+                    try:
+                        source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+                    except Exception as e:
+                        await self._channel.send(f'There was an error processing your song.\n'
+                                                 f'```css\n[{e}]\n```')
+                        continue
 
-            self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-            await self._channel.send(f'**Now Playing:** `{source.title}` requested by `{source.requester}`')
+                source.volume = self.volume
+                self.current = source
+
+            self._guild.voice_client.play(self.current, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
 
-            # Make sure the FFmpeg process is cleaned up.
-            source.cleanup()
-            self.current = None
+            # clean up ffmpeg process
+            self.current.cleanup()
 
     def destroy(self, guild):
         """Disconnect and cleanup the player."""
@@ -208,7 +213,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!', delete_after=20)
+            return await ctx.send('I am not currently playing anything!')
 
         if vc.is_paused():
             pass
@@ -225,7 +230,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently connected to voice!', delete_after=20)
+            return await ctx.send('I am not currently connected to voice!')
 
         player = self.get_player(ctx)
         if player.queue.empty():
@@ -246,7 +251,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently connected to voice!', delete_after=20)
+            return await ctx.send('I am not currently connected to voice!')
 
         player = self.get_player(ctx)
         if not player.current:
@@ -270,7 +275,7 @@ class Music(commands.Cog):
             return
 
         if not 1 <= vol <= 100:
-            await ctx.send('Please enter a value between 1 and 100.')
+            await ctx.send('Volume should be between 1 and 100')
             return
 
         player = self.get_player(ctx)
@@ -282,7 +287,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
     @commands.guild_only()
-    @commands.command(name="disconnect", aliases=["dc", "stop"])
+    @commands.command(name="disconnect", aliases=["dc", "stop", "leave"])
     async def disconnect(self, ctx):
         """Stop the currently playing song and destroy the player.
         """
