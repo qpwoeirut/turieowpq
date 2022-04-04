@@ -1,3 +1,5 @@
+import traceback
+
 import discord
 from discord.ext import commands
 
@@ -95,25 +97,19 @@ class Music(commands.Cog):
             pass
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
-        """A local check which applies to all commands in this cog."""
-        if not ctx.guild:
-            raise commands.NoPrivateMessage
-        return True
-
-    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send('This command can not be used in DMs')
+                await ctx.send('This command can not be used in DMs')
+                return
             except discord.HTTPException:
                 pass
         elif isinstance(error, InvalidVoiceChannel):
             await ctx.send('invalid voice channel!')
 
         print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
-        # traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
     def get_player(self, ctx):
         """Retrieve the music player, or generate one."""
@@ -121,6 +117,7 @@ class Music(commands.Cog):
             self.player = MusicPlayer(ctx)
         return self.player
 
+    @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
     async def join(self, ctx, *, channel: discord.VoiceChannel=None):
         """join a voice channel
@@ -152,6 +149,7 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
+    @commands.guild_only()
     @commands.command(name='play')
     async def play(self, ctx, *, search: str):
         """Request a song and add it to the queue.
@@ -175,6 +173,7 @@ class Music(commands.Cog):
 
         await player.queue.put(source)
 
+    @commands.guild_only()
     @commands.command(name='pause')
     async def pause(self, ctx):
         """Pause the currently playing song."""
@@ -188,6 +187,7 @@ class Music(commands.Cog):
         vc.pause()
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
+    @commands.guild_only()
     @commands.command(name='resume')
     async def resume(self, ctx):
         """Resume the currently paused song."""
@@ -201,8 +201,9 @@ class Music(commands.Cog):
         vc.resume()
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
+    @commands.guild_only()
     @commands.command(name='skip')
-    async def skip_(self, ctx):
+    async def skip(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
 
@@ -217,6 +218,7 @@ class Music(commands.Cog):
         vc.stop()
         await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
 
+    @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
@@ -237,8 +239,9 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.guild_only()
     @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
-    async def now_playing_(self, ctx):
+    async def now_playing(self, ctx):
         """Display information about the currently playing song."""
         vc = ctx.voice_client
 
@@ -251,6 +254,7 @@ class Music(commands.Cog):
 
         await ctx.send(f'**Now Playing:** `{vc.source.title}` requested by `{vc.source.requester}`')
 
+    @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
     async def change_volume(self, ctx, *, vol: float):
         """Change the player volume.
@@ -277,6 +281,7 @@ class Music(commands.Cog):
         player.volume = vol / 100
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
+    @commands.guild_only()
     @commands.command(name="disconnect", aliases=["dc", "stop"])
     async def disconnect(self, ctx):
         """Stop the currently playing song and destroy the player.
