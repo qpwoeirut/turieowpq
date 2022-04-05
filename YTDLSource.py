@@ -48,10 +48,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return self.__getattribute__(item)
 
     @classmethod
-    async def create_source(cls, ctx, search: str, *, loop, download=False):
+    async def create_source(cls, ctx, search: str, *, loop):
         loop = loop or asyncio.get_event_loop()
 
-        to_run = partial(ytdl.extract_info, url=search, download=download)
+        to_run = partial(ytdl.extract_info, url=search, download=False)
         data = await loop.run_in_executor(None, to_run)
 
         if 'entries' in data:
@@ -60,12 +60,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```')
 
-        if download:
-            source = ytdl.prepare_filename(data)
-        else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-
-        return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
+        return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
