@@ -45,12 +45,8 @@ class MusicPlayer:
     async def player_loop(self):
         await self.bot.wait_until_ready()
 
-        music_log("bot ready!")
-
         while not self.bot.is_closed():
             self.next.clear()
-
-            music_log("loop song, queue:", self.loop_song, self.loop_queue)
 
             if self.current is None or self.loop_song is False:
                 try:
@@ -79,14 +75,9 @@ class MusicPlayer:
                                              f'```css\n[{e}]\n```')
                     continue
 
-            music_log("starting")
-            music_log("source", source)
-            music_log("self.current", self.current)
             self._guild.voice_client.play(self.current, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
-
-            music_log("finished")
 
             if self.loop_queue and not self.loop_song:
                 await self.queue.put(source)
