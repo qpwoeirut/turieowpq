@@ -11,6 +11,7 @@ This bot is currently hosted on Heroku's free tier, which is nonideal since it g
 The buildpacks for ffmpeg (https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git) and opus (https://github.com/xrisk/heroku-opus.git) need to be added in order for the bot to run.
 
 ## TODOs
+* Add a restart command
 * Add shuffling
   * Investigate not using `asyncio.Queue`
 * Add download caches
