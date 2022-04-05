@@ -1,6 +1,8 @@
 import itertools
 import random
 
+import discord
+
 WORDS = ["scary", "lel", "lol", "aiya", "bruh", "breh", "oop", "<:notlikeduck:764579516755738664>",
          "<:tourist_mad:764579517515300914>", "<:confus:764579516755738664>", "<:foncus:766364807732527114>"]
 EMOTES = [":notlikeduck:", ":tourist_mad:", ":confus:", ":foncus:"]
@@ -59,4 +61,4 @@ async def spam(message):
     else:
         return
     # print(f"sent {reply}", file=f)
-    await message.channel.send(reply)
+    await message.channel.send(reply, allowed_mentions=discord.AllowedMentions.none())
