@@ -1,8 +1,6 @@
-
-
 # SOLVE aiohttp.client_exceptions.ClientConnectorCertificateError
 # https://stackoverflow.com/questions/59411362/ssl-certificate-verify-failed-certificate-verify-failed-unable-to-get-local-i
-
+import discord
 from discord.ext import commands
 
 from get_token import DISCORD_TOKEN
@@ -10,7 +8,7 @@ from music import Music
 from spammer import spam
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or("turi "),
-                      description='turieowpq')
+                      description='turieowpq', allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
 
 
 @client.event
