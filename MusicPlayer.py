@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 
 from async_timeout import timeout
@@ -6,6 +7,7 @@ from async_timeout import timeout
 from YTDLSource import YTDLSource
 
 
+os.mkdir("logs")
 MUSIC_LOGS_FILENAME = "logs/music_logs.txt"
 with open(MUSIC_LOGS_FILENAME, "w"):  # clear file
     pass
