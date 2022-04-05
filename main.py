@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 from get_token import DISCORD_TOKEN
-from music import Music
+from MusicCog import MusicCog
 from spammer import spam
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or("turi "),
@@ -30,5 +30,5 @@ async def on_message(message):
 
 
 if __name__ == '__main__':
-    client.add_cog(Music(client))
+    client.add_cog(MusicCog(client))
     client.run(DISCORD_TOKEN)
