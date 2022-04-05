@@ -15,6 +15,7 @@ The `.env` file isn't in the repository since it's secret.
 * Add seek commands
 * Add current time to nowplaying
 * Improve queue embed (pagination?!)
+  * Also add loop settings
 * Add stats for what music I listen to
 * Figure out the `HTTP error 403 Forbidden`s
 
