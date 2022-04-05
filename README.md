@@ -7,7 +7,6 @@ It's been personalized for my own preferences and might not work too well if mul
 The `.env` file isn't in the repository since it's secret.
 
 ## TODOs
-* Add shortcuts for songs
 * Add shuffling
   * Investigate not using `asyncio.Queue`
 * Add download caches

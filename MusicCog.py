@@ -9,6 +9,7 @@ import sys
 
 from MusicPlayer import MusicPlayer
 from YTDLSource import YTDLSource
+from taylor_swift import TAYLOR_SWIFT
 
 
 class VoiceConnectionError(commands.CommandError):
@@ -91,6 +92,14 @@ class MusicCog(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
+    async def _play(self, ctx, search: str):
+        player = self.get_player(ctx)
+
+        # each source is a dict which will be used later to regather the stream
+        sources = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
+        for source in sources:
+            await player.queue.put(source)
+
     @commands.guild_only()
     @commands.command(name='play')
     async def play(self, ctx, *, search: str):
@@ -108,12 +117,21 @@ class MusicCog(commands.Cog):
         if not ctx.voice_client:
             await ctx.invoke(self.join)
 
-        player = self.get_player(ctx)
+        await self._play(ctx, search)
 
-        # each source is a dict which will be used later to regather the stream
-        sources = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
-        for source in sources:
-            await player.queue.put(source)
+    @commands.guild_only()
+    @commands.command(name="taylor_swift", aliases=["ts", "taylor", "preset", "play_preset"])
+    async def taylor_swift(self, ctx, *, search: str):
+        if search.lower() not in TAYLOR_SWIFT.keys():
+            await ctx.send("Search not found!")
+            return
+
+        await ctx.trigger_typing()
+
+        if not ctx.voice_client:
+            await ctx.invoke(self.join)
+
+        await self._play(ctx, TAYLOR_SWIFT[search])
 
     @commands.guild_only()
     @commands.command(name='pause')
