@@ -7,12 +7,13 @@ It's been personalized for my own preferences and might not work too well if mul
 The `.env` file isn't in the repository since it's secret.
 
 ## TODOs
-* Add playlist abilities
 * Add looping
 * Add shortcuts for songs
+* Add shuffling
 * Add download caches
 * Make turi disconnect when taken offline
 * Add seek commands
+* Add current time to nowplaying
 * Improve queue embed (pagination?!)
 
 ## References
