@@ -80,7 +80,8 @@ class MusicPlayer:
                     continue
 
             music_log("starting")
-
+            music_log("source", source)
+            music_log("self.current", self.current)
             self._guild.voice_client.play(self.current, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
