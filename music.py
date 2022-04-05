@@ -21,8 +21,6 @@ class InvalidVoiceChannel(VoiceConnectionError):
 
 class MusicPlayer:
     """A class which is assigned to each guild using the bot for music.
-    This class implements a queue and loop, which allows for different guilds to listen to different playlists
-    simultaneously.
     When the bot disconnects from the vc its instance will be destroyed.
     """
 
