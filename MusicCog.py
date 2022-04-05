@@ -37,23 +37,20 @@ class MusicCog(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
-        if isinstance(error, commands.NoPrivateMessage):
-            try:
+        try:
+            if isinstance(error, commands.NoPrivateMessage):
                 await ctx.send('This command can not be used in DMs')
-                return
-            except discord.HTTPException:
-                pass
-        elif isinstance(error, InvalidVoiceChannel):
-            await ctx.send('invalid voice channel!')
-            return
-        elif isinstance(error, commands.CommandNotFound):
-            await ctx.send('invalid command!')
-            return
+            elif isinstance(error, InvalidVoiceChannel):
+                await ctx.send('invalid voice channel!')
+            elif isinstance(error, commands.CommandNotFound):
+                await ctx.send('invalid command!')
+            else:
+                print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
+                traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
-        print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-
-        await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
+                await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
+        except discord.HTTPException:
+            pass
 
     def get_player(self, ctx):
         """Retrieve the music player, or generate one."""
@@ -63,10 +60,11 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
-    async def join(self, ctx, *, channel: discord.VoiceChannel=None):
+    async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         """join a voice channel
         Parameters
         ------------
+        ctx: context
         channel: discord.VoiceChannel [Optional]
             The channel to connect to. If a channel is not specified, an attempt to join the voice channel you are in
             will be made.
@@ -101,6 +99,7 @@ class MusicCog(commands.Cog):
         Uses YTDL to automatically search and retrieve a song.
         Parameters
         ------------
+        ctx: context
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
@@ -111,10 +110,10 @@ class MusicCog(commands.Cog):
 
         player = self.get_player(ctx)
 
-        # a dict which will be used later to regather the stream
-        source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
-
-        await player.queue.put(source)
+        # each source is a dict which will be used later to regather the stream
+        sources = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
+        for source in sources:
+            await player.queue.put(source)
 
     @commands.guild_only()
     @commands.command(name='pause')
@@ -174,16 +173,16 @@ class MusicCog(commands.Cog):
         if player.queue.empty():
             return await ctx.send('There are currently no more queued songs.')
 
-        # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 5))
+        # Grab up to 10 entries from the queue...
+        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
 
         fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
-        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
+        embed = discord.Embed(title=f'Next {len(upcoming)} songs (out of {player.queue.qsize()})', description=fmt)
 
         await ctx.send(embed=embed)
 
     @commands.guild_only()
-    @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
+    @commands.command(name='now_playing', aliases=['np', "nowplaying", 'current', 'currentsong', 'playing'])
     async def now_playing(self, ctx):
         """Display information about the currently playing song."""
         vc = ctx.voice_client

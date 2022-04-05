@@ -54,13 +54,16 @@ class YTDLSource(discord.PCMVolumeTransformer):
         to_run = partial(ytdl.extract_info, url=search, download=False)
         data = await loop.run_in_executor(None, to_run)
 
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+        # make a list, even if there's only one song, in order to support playlists
+        data_list = data["entries"] if "entries" in data else [data]
 
-        await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```')
+        message = f"[Added {data['title']} to the Queue.{'' if len(data_list) == 1 else f'({len(data_list)} songs)'}]"
+        await ctx.send(f'```ini\n{message}\n```')
 
-        return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+        return [
+            {'webpage_url': item['webpage_url'], 'requester': ctx.author, 'title': item['title']}
+            for item in data_list
+        ]
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
