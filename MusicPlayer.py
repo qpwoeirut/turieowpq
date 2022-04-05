@@ -40,8 +40,6 @@ class MusicPlayer:
                     # Wait for the next song. If we timeout cancel the player and disconnect...
                     async with timeout(5 * 60):  # 5 minutes
                         source = await self.queue.get()
-                        if self.loop_queue:
-                            await self.queue.put(source)
                 except asyncio.TimeoutError:
                     return self.destroy(self._guild)
 
@@ -49,18 +47,27 @@ class MusicPlayer:
                     # Source was probably a stream (not downloaded)
                     # So we should regather to prevent stream expiration
                     try:
-                        source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+                        self.current = await YTDLSource.regather_stream(source, loop=self.bot.loop)
                     except Exception as e:
                         await self._channel.send(f'There was an error processing your song.\n'
                                                  f'```css\n[{e}]\n```')
                         continue
 
-                source.volume = self.volume
-                self.current = source
+                self.current.volume = self.volume
+            else:
+                try:
+                    self.current = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+                except Exception as e:
+                    await self._channel.send(f'There was an error processing your song.\n'
+                                             f'```css\n[{e}]\n```')
+                    continue
 
             self._guild.voice_client.play(self.current, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
+
+            if self.loop_queue and not self.loop_song:
+                await self.queue.put(source)
 
             # clean up ffmpeg process
             self.current.cleanup()

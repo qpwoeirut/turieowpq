@@ -161,6 +161,20 @@ class MusicCog(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
 
     @commands.guild_only()
+    @commands.command(name="loop", aliases=["qloop", "loopq", "loop_queue", "loopqueue"])
+    async def loop_queue(self, ctx):
+        player = self.get_player(ctx)
+        player.loop_queue = not player.loop_queue
+        await ctx.send(f"Looping queue **{'enabled' if player.loop_queue else 'disabled'}**!")
+
+    @commands.guild_only()
+    @commands.command(name="loop_song", aliases=["sloop", "loops", "loopsong"])
+    async def loop_song(self, ctx):
+        player = self.get_player(ctx)
+        player.loop_song = not player.loop_song
+        await ctx.send(f"Looping song **{'enabled' if player.loop_song else 'disabled'}**!")
+
+    @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
@@ -194,7 +208,9 @@ class MusicCog(commands.Cog):
         if not player.current:
             return await ctx.send('I am not currently playing anything!')
 
-        await ctx.send(f'**Now Playing:** `{vc.source.title}` requested by `{vc.source.requester}`')
+        current_song_info = f"**Now Playing:** `{vc.source.title}` requested by `{vc.source.requester}`."
+        loop_settings_info = f"Looping song: {player.loop_song}. Looping queue: {player.loop_queue}."
+        await ctx.send(f"{current_song_info}\n{loop_settings_info}")
 
     @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
