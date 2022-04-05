@@ -1,12 +1,11 @@
-import traceback
-
 import discord
 from discord.ext import commands
 
 import asyncio
 import itertools
+import traceback
 
-from MusicPlayer import MusicPlayer
+from MusicPlayer import MusicPlayer, music_log, MUSIC_LOGS_FILENAME
 from YTDLSource import YTDLSource
 from taylor_swift import TAYLOR_SWIFT
 
@@ -27,9 +26,6 @@ class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.player = None
-        self.log_filename = "music_logs.txt"
-        with open(self.log_filename, "w"):
-            pass
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -42,8 +38,8 @@ class MusicCog(commands.Cog):
             elif isinstance(error, commands.CommandNotFound):
                 await ctx.send('invalid command!')
             else:
-                with open(self.log_filename, "a+") as log_file:
-                    print(f'Ignoring exception in command {ctx.command}:', file=log_file)
+                music_log(f'Ignoring exception in command {ctx.command}:')
+                with open(MUSIC_LOGS_FILENAME, "a") as log_file:
                     traceback.print_exception(type(error), error, error.__traceback__, file=log_file)
 
                 await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
@@ -68,8 +64,7 @@ class MusicCog(commands.Cog):
             will be made.
         This command also handles moving the bot to different channels.
         """
-        with open(self.log_filename, "a+") as log_file:
-            print(f"joining voice channel {channel}", file=log_file)
+        music_log(f"joining voice channel {channel}")
         if not channel:
             try:
                 channel = ctx.author.voice.channel
@@ -111,8 +106,7 @@ class MusicCog(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
-        with open(self.log_filename, "a+") as log_file:
-            print(f"playing from search: {search}", file=log_file)
+        music_log(f"playing from search: {search}")
 
         await ctx.trigger_typing()
 
@@ -124,8 +118,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name="taylor_swift", aliases=["ts", "taylor", "preset", "play_preset"])
     async def taylor_swift(self, ctx, *, search: str):
-        with open(self.log_filename, "a+") as log_file:
-            print(f"playing from taylor swift: {search}", file=log_file)
+        music_log(f"playing from taylor swift: {search}")
 
         if search.lower() not in TAYLOR_SWIFT.keys():
             await ctx.send("Search not found!")
@@ -283,6 +276,6 @@ class MusicCog(commands.Cog):
 
     @commands.command(name="dump_logs")
     async def dump_logs(self, ctx):
-        with open(self.log_filename) as log_file:
+        with open(MUSIC_LOGS_FILENAME) as log_file:
             logs = log_file.read()
         await ctx.send(f"```\n{logs[-4990:]}\n```")
