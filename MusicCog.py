@@ -7,6 +7,7 @@ import asyncio
 import itertools
 import sys
 
+from MusicPlayer import MusicPlayer
 from YTDLSource import YTDLSource
 
 
@@ -44,9 +45,15 @@ class MusicCog(commands.Cog):
                 pass
         elif isinstance(error, InvalidVoiceChannel):
             await ctx.send('invalid voice channel!')
+            return
+        elif isinstance(error, commands.CommandNotFound):
+            await ctx.send('invalid command!')
+            return
 
         print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
+        await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
 
     def get_player(self, ctx):
         """Retrieve the music player, or generate one."""
