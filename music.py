@@ -261,10 +261,11 @@ class Music(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
-    async def change_volume(self, ctx, *, vol: float):
+    async def change_volume(self, ctx, *, volume: float):
         """Change the player volume.
         Parameters
         ------------
+        ctx: context
         volume: float or int [Required]
             The volume to set the player to in percentage. This must be between 1 and 100.
         """
@@ -274,17 +275,17 @@ class Music(commands.Cog):
             await ctx.send('I am not currently connected to voice!')
             return
 
-        if not 1 <= vol <= 100:
+        if not 1 <= volume <= 100:
             await ctx.send('Volume should be between 1 and 100')
             return
 
         player = self.get_player(ctx)
 
         if vc.source:
-            vc.source.volume = vol / 100
+            vc.source.volume = volume / 100
 
-        player.volume = vol / 100
-        await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
+        player.volume = volume / 100
+        await ctx.send(f'**`{ctx.author}`**: Set the volume to **{volume}%**')
 
     @commands.guild_only()
     @commands.command(name="disconnect", aliases=["dc", "stop", "leave"])
