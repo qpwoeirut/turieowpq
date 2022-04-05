@@ -54,6 +54,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
         to_run = partial(ytdl.extract_info, url=search, download=False)
         data = await loop.run_in_executor(None, to_run)
 
+        if data["extractor"] == "youtube:search":  # search queries return a playlist; we'll pick the first song
+            assert "entries" in data, "Expected key 'entries' to exist in returned data from search query"
+            data = data["entries"][0]
+
         # make a list, even if there's only one song, in order to support playlists
         data_list = data["entries"] if "entries" in data else [data]
 
