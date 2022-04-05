@@ -10,11 +10,15 @@ The `.env` file isn't in the repository since it's secret.
 * Add looping
 * Add shortcuts for songs
 * Add shuffling
+  * Investigate not using `asyncio.Queue`
 * Add download caches
 * Make turi disconnect when taken offline
+  * Check that the cleanup works properly
 * Add seek commands
 * Add current time to nowplaying
 * Improve queue embed (pagination?!)
+* Add stats for what music I listen to
+* Figure out the `HTTP error 403 Forbidden`s
 
 ## References
 * The spammer is loosely based on https://medium.com/better-programming/coding-a-discord-bot-with-python-64da9d6cade7
