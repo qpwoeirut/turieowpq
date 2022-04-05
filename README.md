@@ -1,6 +1,8 @@
 # turieowpq
 
 This repo stores the code for qpwoeirut's spambot named turieowpq (turi for short).
+Turi can also play music, sort of.
+It's been personalized for my own preferences and might not work too well if multiple people use it at once.
 
 The `.env` file isn't in the repository since it's secret.
 
@@ -9,6 +11,9 @@ The `.env` file isn't in the repository since it's secret.
 * Add looping
 * Add shortcuts for songs
 * Add download caches
+* Make turi disconnect when taken offline
+* Add seek commands
+* Improve queue embed (pagination?!)
 
 ## References
 * The spammer is loosely based on https://medium.com/better-programming/coding-a-discord-bot-with-python-64da9d6cade7
