@@ -54,6 +54,7 @@ class MusicPlayer:
                     async with timeout(5 * 60):  # 5 minutes
                         source = await self.queue.get()
                 except asyncio.TimeoutError:
+                    music_log("Timed out while waiting for next song in queue, disconnecting")
                     return self.destroy(self._guild)
 
                 if not isinstance(source, YTDLSource):
