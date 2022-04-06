@@ -273,6 +273,7 @@ class MusicCog(commands.Cog):
             await guild.voice_client.disconnect()
         except AttributeError:
             pass
+        self.player = None
 
     @commands.command(name="dump_logs")
     async def dump_logs(self, ctx):
