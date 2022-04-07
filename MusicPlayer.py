@@ -7,7 +7,8 @@ from async_timeout import timeout
 from YTDLSource import YTDLSource
 
 
-os.mkdir("logs")
+if not os.path.exists("logs"):
+    os.mkdir("logs")
 MUSIC_LOGS_FILENAME = "logs/music_logs.txt"
 with open(MUSIC_LOGS_FILENAME, "w"):  # clear file
     pass
