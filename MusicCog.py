@@ -257,7 +257,7 @@ class MusicCog(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{volume}%**')
 
     @commands.guild_only()
-    @commands.command(name="disconnect", aliases=["dc", "stop", "leave"])
+    @commands.command(name="disconnect", aliases=["dc", "stop", "leave", "bye"])
     async def disconnect(self, ctx):
         """Stop the currently playing song and destroy the player.
         """
