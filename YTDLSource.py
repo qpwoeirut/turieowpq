@@ -23,9 +23,10 @@ ytdl_format_options = {
     "highwatermark": 1 << 15
 }
 
+# https://stackoverflow.com/questions/66070749/how-to-fix-discord-music-bot-that-stops-playing-before-the-song-is-actually-over
 ffmpeg_options = {
-    'before_options': '-nostdin',
-    'options': '-vn'
+    'options': '-vn',
+    "before_options": "-nostdin -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
