@@ -81,6 +81,9 @@ class MusicPlayer:
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
 
+            # trying to fix issue where last few seconds of each song gets cut
+            await asyncio.sleep(self._guild.voice_client.average_latency + 0.5)
+
             if self.loop_queue and not self.loop_song:
                 await self.queue.put(source)
 
