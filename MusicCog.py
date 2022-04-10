@@ -279,4 +279,4 @@ class MusicCog(commands.Cog):
     async def dump_logs(self, ctx):
         with open(MUSIC_LOGS_FILENAME) as log_file:
             logs = log_file.read()
-        await ctx.send(f"```\n{logs[-3990:]}\n```")
+        await ctx.send(f"```\n{logs[-1990:]}\n```")
