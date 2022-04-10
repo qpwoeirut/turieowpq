@@ -280,3 +280,7 @@ class MusicCog(commands.Cog):
         with open(MUSIC_LOGS_FILENAME) as log_file:
             logs = log_file.read()
         await ctx.send(f"```\n{logs[-1990:]}\n```")
+
+    @commands.command(name="ping")
+    async def ping(self, ctx):
+        await ctx.send(f"Latency: {round(self.bot.latency * 1000)}ms")
