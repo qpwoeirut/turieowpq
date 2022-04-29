@@ -7,8 +7,7 @@ It's been personalized for my own preferences and might not work too well if mul
 The `.env` file isn't in the repository since it's secret.
 
 ## Hosting
-This bot is currently hosted on Heroku's free tier, which is nonideal since it goes down for around the last week of each month.
-The buildpacks for ffmpeg (https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git) and opus (https://github.com/xrisk/heroku-opus.git) need to be added in order for the bot to run.
+This bot is currently hosted on Oracle Cloud's free tier using a VM.Standard.E2.1.Micro instance running an Ubuntu image.
 
 ## TODOs
 * Add a restart command
