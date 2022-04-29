@@ -24,8 +24,9 @@ ytdl_format_options = {
 }
 
 # https://stackoverflow.com/questions/66070749/how-to-fix-discord-music-bot-that-stops-playing-before-the-song-is-actually-over
+# https://stackoverflow.com/questions/50924411/using-ffmpeg-with-python-input-buffer-exhausted-before-end-element-found
 ffmpeg_options = {
-    'options': '-vn',
+    'options': '-vn -dn -sn -ignore_unknown',
     "before_options": "-nostdin -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
 }
 
@@ -81,4 +82,4 @@ class YTDLSource(discord.PCMVolumeTransformer):
         to_run = partial(ytdl.extract_info, url=data['webpage_url'], download=False)
         data = await loop.run_in_executor(None, to_run)
 
-        return cls(discord.FFmpegPCMAudio(data['url']), data=data, requester=requester)
+        return cls(discord.FFmpegPCMAudio(data['url'], **ffmpeg_options), data=data, requester=requester)
