@@ -3,8 +3,14 @@ import random
 
 import discord
 
-WORDS = ["scary", "lel", "lol", "aiya", "bruh", "breh", "oop", "<:notlikeduck:764579516755738664>",
-         "<:tourist_mad:764579517515300914>", "<:confus:764579516755738664>", "<:foncus:766364807732527114>"]
+# WORDS = ["scary", "lel", "lol", "aiya", "bruh", "breh", "oop", "<:notlikeduck:764579516755738664>",
+#          "<:tourist_mad:764579517515300914>", "<:confus:764579516755738664>", "<:foncus:766364807732527114>"]
+WORDS = [
+    "scary", "terrible", "rude", "lol", "aiya", "bruh", "oop", "true", "ok", "cool", "hi", "hehe", "gah", "issoke",
+    "yes", "epic", "popping", "fair", "omg", ":0", "i-", "indeed", "anyway", "funny", "ugh", "idk",
+    "<:notlikeduck:764579516755738664>", "<:confus:764579516755738664>", "<:foncus:766364807732527114>",
+    ":clown:", "<:lemondamage:928558941330358272>", "<:lemonthink:928558940210466836>"
+]
 EMOTES = [":notlikeduck:", ":tourist_mad:", ":confus:", ":foncus:"]
 WORD_CHANCE = int(len(WORDS) * 1.25)
 COWWIN = ["galen colin", "colin galen", "calen golin", "golin calen", "cowwin", "galen", "colin", "calin golin"]
