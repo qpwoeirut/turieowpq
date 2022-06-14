@@ -1,4 +1,5 @@
 TAYLOR_SWIFT = {
+    "taylor swift": "https://www.youtube.com/playlist?list=OLAK5uy_l320Kcg2IKwpIRR07SD-ZejNX0cxRF32c",
     "red": "https://www.youtube.com/playlist?list=OLAK5uy_kvYl6SDSIWUZ7loEGQlwzF7j04xzWvoZQ",
     "fearless": "https://www.youtube.com/playlist?list=OLAK5uy_lUwH9j_s3ZEeayUSm5o93gtQVz0If_kd8",
     "evermore": "https://www.youtube.com/playlist?list=OLAK5uy_m-vSVOiVeY_z2lPgThmS6Nn0TJExXZtOg",
