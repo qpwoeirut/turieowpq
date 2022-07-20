@@ -127,7 +127,7 @@ class MusicCog(commands.Cog):
         """
         music_log(f"playing from preset: {search}")
 
-        presets = TAYLOR_SWIFT + THE_SCORE
+        presets = TAYLOR_SWIFT | THE_SCORE
 
         if search.lower() not in presets.keys():
             await ctx.send("Search not found!")
