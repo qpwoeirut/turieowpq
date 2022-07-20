@@ -7,7 +7,7 @@ import traceback
 
 from MusicPlayer import MusicPlayer, music_log, MUSIC_LOGS_FILENAME
 from YTDLSource import YTDLSource
-from taylor_swift import TAYLOR_SWIFT
+from preset import TAYLOR_SWIFT
 
 
 class VoiceConnectionError(commands.CommandError):
@@ -29,7 +29,7 @@ class MusicCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        """A local error handler for all errors arising from commands in this cog."""
+        """A local error handler for all errors arising from commands in this cog"""
         try:
             if isinstance(error, commands.NoPrivateMessage):
                 await ctx.send('This command can not be used in DMs')
@@ -47,7 +47,7 @@ class MusicCog(commands.Cog):
             pass
 
     def get_player(self, ctx):
-        """Retrieve the music player, or generate one."""
+        """Retrieve the music player, or generate one"""
         if self.player is None:
             self.player = MusicPlayer(ctx)
         return self.player
@@ -55,7 +55,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
-        """join a voice channel
+        """Join your current voice channel
         Parameters
         ------------
         ctx: context
@@ -116,8 +116,15 @@ class MusicCog(commands.Cog):
         await self._play(ctx, search)
 
     @commands.guild_only()
-    @commands.command(name="taylor_swift", aliases=["ts", "taylor", "preset", "play_preset"])
+    @commands.command(name="preset", aliases=["ts", "taylor", "the_score", "taylor_swift"])
     async def taylor_swift(self, ctx, *, search: str):
+        """Play a song or playlist from a preset list
+        Parameters
+        ------------
+        ctx: context
+        search: str [Required]
+            The song to retrieve from a lookup list in preset.py (case insensitive)
+        """
         music_log(f"playing from taylor swift: {search}")
 
         if search.lower() not in TAYLOR_SWIFT.keys():
@@ -134,7 +141,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='pause')
     async def pause(self, ctx):
-        """Pause the currently playing song."""
+        """Pause the currently playing song"""
         vc = ctx.voice_client
 
         if not vc or not vc.is_playing():
@@ -148,7 +155,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='resume')
     async def resume(self, ctx):
-        """Resume the currently paused song."""
+        """Resume the currently paused song"""
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
@@ -162,7 +169,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='skip')
     async def skip(self, ctx):
-        """Skip the song."""
+        """Skip the song"""
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
@@ -179,6 +186,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name="loop", aliases=["qloop", "loopq", "loop_queue", "loopqueue"])
     async def loop_queue(self, ctx):
+        """Add a song to the end of the queue when it ends or is skipped"""
         player = self.get_player(ctx)
         player.loop_queue = not player.loop_queue
         await ctx.send(f"Looping queue **{'enabled' if player.loop_queue else 'disabled'}**!")
@@ -186,6 +194,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name="loop_song", aliases=["sloop", "loops", "loopsong"])
     async def loop_song(self, ctx):
+        """Loop the current song"""
         player = self.get_player(ctx)
         player.loop_song = not player.loop_song
         await ctx.send(f"Looping song **{'enabled' if player.loop_song else 'disabled'}**!")
@@ -193,7 +202,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
     async def queue_info(self, ctx):
-        """Retrieve a basic queue of upcoming songs."""
+        """Retrieve a basic queue of upcoming songs"""
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
@@ -203,8 +212,8 @@ class MusicCog(commands.Cog):
         if player.queue.empty():
             return await ctx.send('There are currently no more queued songs.')
 
-        # Grab up to 10 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
+        # Grab up to 15 entries from the queue...
+        upcoming = list(itertools.islice(player.queue._queue, 0, 15))
 
         fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
         embed = discord.Embed(title=f'Next {len(upcoming)} songs (out of {player.queue.qsize()})', description=fmt)
@@ -231,7 +240,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
     async def change_volume(self, ctx, *, volume: float):
-        """Change the player volume.
+        """Change the player volume
         Parameters
         ------------
         ctx: context
@@ -259,7 +268,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name="disconnect", aliases=["dc", "stop", "leave", "bye"])
     async def disconnect(self, ctx):
-        """Stop the currently playing song and destroy the player.
+        """Stop the currently playing song and destroy the player
         """
         vc = ctx.voice_client
 
