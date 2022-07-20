@@ -7,7 +7,7 @@ import traceback
 
 from MusicPlayer import MusicPlayer, music_log, MUSIC_LOGS_FILENAME
 from YTDLSource import YTDLSource
-from preset import TAYLOR_SWIFT
+from preset import TAYLOR_SWIFT, THE_SCORE
 
 
 class VoiceConnectionError(commands.CommandError):
@@ -117,7 +117,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name="preset", aliases=["ts", "taylor", "the_score", "taylor_swift"])
-    async def taylor_swift(self, ctx, *, search: str):
+    async def preset(self, ctx, *, search: str):
         """Play a song or playlist from a preset list
         Parameters
         ------------
@@ -125,9 +125,11 @@ class MusicCog(commands.Cog):
         search: str [Required]
             The song to retrieve from a lookup list in preset.py (case insensitive)
         """
-        music_log(f"playing from taylor swift: {search}")
+        music_log(f"playing from preset: {search}")
 
-        if search.lower() not in TAYLOR_SWIFT.keys():
+        presets = TAYLOR_SWIFT + THE_SCORE
+
+        if search.lower() not in presets.keys():
             await ctx.send("Search not found!")
             return
 
@@ -136,7 +138,7 @@ class MusicCog(commands.Cog):
         if not ctx.voice_client:
             await ctx.invoke(self.join)
 
-        await self._play(ctx, TAYLOR_SWIFT[search])
+        await self._play(ctx, presets[search])
 
     @commands.guild_only()
     @commands.command(name='pause')
