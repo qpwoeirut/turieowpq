@@ -6,10 +6,16 @@ TAYLOR_SWIFT = {
     "folklore": "https://www.youtube.com/playlist?list=OLAK5uy_nWgO-2lNMsx90439Yx0xTWCGIktUc74e8",
     "lover": "https://www.youtube.com/playlist?list=OLAK5uy_nHHWc9S0Nw7oLyLYBptkJ4DpkQeoL1Igw",
     "reputation": "https://www.youtube.com/playlist?list=OLAK5uy_kyYsExXByLh2281MMfi0QvZJF5epEUxbk",
-    "1989": "https://www.youtube.com/playlist?list=OLAK5uy_lglIKPOFCG5X9_Rf4Hxsmmh9GEeHL94Jo",
+    "1989": "https://www.youtube.com/playlist?list=PLqyng5B_ZuT_3fRojFoMweV4WXa-QQ1kq",
     "red original": "https://www.youtube.com/playlist?list=OLAK5uy_mwwCV3ci_DoOhgq27DRqnrVG3QOR_S2hQ",
     "speak now": "https://www.youtube.com/playlist?list=OLAK5uy_k_sq8Sp6KDtHZIxW6ovITiJhl6SIC-5gw",
     "fearless original": "https://www.youtube.com/playlist?list=OLAK5uy_kymlVnEd_mmMQfc4GJJPTNOW-ipnOhsrY",
     "red piano": "https://www.youtube.com/watch?v=FSbpyATwAJs",
-    "fearless piano": "https://www.youtube.com/watch?v=YBrTNiKBdog&t=2780s"
+    "fearless piano": "https://www.youtube.com/watch?v=YBrTNiKBdog"
+}
+
+THE_SCORE = {
+    "atlas": "https://www.youtube.com/playlist?list=OLAK5uy_ln3teeQf_C730ud8-DFxtr9RijjM_CXe4",
+    "carry on": "https://www.youtube.com/playlist?list=OLAK5uy_nrvMViAVt6zizmPXf0I95h3zP9aEPr_s8",
+    "metamorph": "https://www.youtube.com/playlist?list=OLAK5uy_kIiPYNXdOHp5LSCE988IwRx-anaU6tskE"
 }
