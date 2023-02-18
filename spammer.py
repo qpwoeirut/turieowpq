@@ -23,20 +23,16 @@ def is_hm(text):
 
 
 async def spam(message):
-    # with open("log.txt", 'a') as f:
-    #     print(f"{message.author} said: {message.content}", file=f)
     msg = message.content.lower()
     if message.author.id == 145266128363585536 and any([msg in orz for orz in COLIN_ORZ]):
         reply = random.choice(COWWIN)
     elif any([emote in msg for emote in itertools.chain(EMOTES, WORDS)]):
-        # print("word matched", file=f)
         idx = random.randint(0, WORD_CHANCE - 1)
         if idx < len(WORDS):
             reply = WORDS[idx]
         else:
             reply = message.content
     elif is_hm(msg):
-        # print("hm matched", file=f)
         if random.randint(1, 10) == 1:
             reply = "yumm"
         else:
@@ -47,16 +43,12 @@ async def spam(message):
             reply += 'h'
             reply += 'm' * random.randint(1, reply_size)
     elif "sir" in msg:
-        # print("sir matched", file=f)
         reply = f"hello {message.author.mention} sir"
     elif "sad" in msg:
-        # print("sad matched, file=f)
         reply = f"{random.choice(['so', 'very'])} sad!"
     elif 'q' in msg and random.randint(1, 3) == 1:
-        # print("q matched", file=f)
         reply = "q is the best letter!"
     elif random.randint(1, 5) == 1:
-        # print("random word", file=f)
         reply = random.choice(WORDS)
     elif ' ' not in message.content and ':' not in message.content and random.randint(1, 8) == 1:
         reply = message.content[::-1]
@@ -66,5 +58,4 @@ async def spam(message):
         reply = ' '.join(words)
     else:
         return
-    # print(f"sent {reply}", file=f)
     await message.channel.send(reply, allowed_mentions=discord.AllowedMentions.none())
