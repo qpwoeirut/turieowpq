@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from async_timeout import timeout
+from discord.ext.commands import Context
 
 from YTDLSource import YTDLSource
 
@@ -18,7 +19,7 @@ class MusicPlayer:
 
     __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'volume', 'loop_song', 'loop_queue')
 
-    def __init__(self, ctx):
+    def __init__(self, ctx: Context):
         self.bot = ctx.bot
         self._guild = ctx.guild
         self._channel = ctx.channel
