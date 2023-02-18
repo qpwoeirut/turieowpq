@@ -1,12 +1,13 @@
 import asyncio
 import itertools
+import logging
 import traceback
 
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from MusicPlayer import MusicPlayer, music_log, MUSIC_LOGS_FILENAME
+from MusicPlayer import MusicPlayer
 from YTDLSource import YTDLSource
 from preset import TAYLOR_SWIFT, THE_SCORE
 
@@ -39,8 +40,8 @@ class MusicCog(commands.Cog):
             elif isinstance(error, commands.CommandNotFound):
                 await ctx.send('invalid command!')
             else:
-                music_log(f'Ignoring exception in command {ctx.command}:')
-                with open(MUSIC_LOGS_FILENAME, "a") as log_file:
+                logging.info(f'Ignoring exception in command {ctx.command}:')
+                with open("log.txt", "a") as log_file:
                     traceback.print_exception(type(error), error, error.__traceback__, file=log_file)
 
                 await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
@@ -65,7 +66,7 @@ class MusicCog(commands.Cog):
             will be made.
         This command also handles moving the bot to different channels.
         """
-        music_log(f"joining voice channel {channel}")
+        logging.info(f"joining voice channel {channel}")
         if not channel:
             try:
                 channel = ctx.author.voice.channel
@@ -93,7 +94,9 @@ class MusicCog(commands.Cog):
         # each source is a dict which will be used later to regather the stream
         sources = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
         for source in sources:
-            await player.queue.put(source)
+            await player.queue.put({
+                'url': source['url'], 'requester': ctx.author, 'title': source['title']
+            })
 
     @commands.guild_only()
     @commands.command(name='play')
@@ -107,7 +110,7 @@ class MusicCog(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
-        music_log(f"playing from search: {search}")
+        logging.info(f"playing from search: {search}")
 
         await ctx.typing()
 
@@ -126,8 +129,7 @@ class MusicCog(commands.Cog):
         search: str [Required]
             The song to retrieve from a lookup list in preset.py (case insensitive)
         """
-        music_log(f"playing from preset: {search}")
-        print(type(ctx))
+        logging.info(f"playing from preset: {search}")
 
         presets = TAYLOR_SWIFT | THE_SCORE
 
@@ -284,13 +286,14 @@ class MusicCog(commands.Cog):
     async def cleanup(self, guild):
         try:
             await guild.voice_client.disconnect()
+            await guild.voice_client.cleanup()
         except AttributeError:
             pass
         self.player = None
 
     @commands.command(name="dump_logs")
     async def dump_logs(self, ctx: Context):
-        with open(MUSIC_LOGS_FILENAME) as log_file:
+        with open("log.txt") as log_file:
             logs = log_file.read()
         await ctx.send(f"```\n{logs[-1990:]}\n```")
 

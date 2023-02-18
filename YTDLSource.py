@@ -1,9 +1,10 @@
 import asyncio
 from functools import partial
+from typing import Iterable
 
 import discord
 import yt_dlp
-
+from discord.ext.commands import Context
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -36,7 +37,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.requester = requester
 
         self.title = data.get('title')
-        self.web_url = data.get('webpage_url')
 
         # YTDL info dicts (data) have other useful information you might want
         # https://github.com/rg3/youtube-dl/blob/master/README.md
@@ -48,10 +48,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return self.__getattribute__(item)
 
     @classmethod
-    async def create_source(cls, ctx, search: str, *, loop):
+    async def create_source(cls, ctx: Context, search: str, *, loop) -> Iterable:
         loop = loop or asyncio.get_event_loop()
 
-        to_run = partial(ytdl.extract_info, url=search, download=False)
+        # for playlists, set process=False to get a generator for entries instead of downloading all the info at once
+        not_playlist = "youtube.com/playlist" not in search
+        if not_playlist:
+            search = "ytsearch1:" + search  # only fetch first result to make things faster
+        to_run = partial(ytdl.extract_info, url=search, download=False, process=not_playlist)
         data = await loop.run_in_executor(None, to_run)
 
         if data["extractor"] == "youtube:search":  # search queries return a playlist; we'll pick the first song
@@ -60,14 +64,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         # make a list, even if there's only one song, in order to support playlists
         data_list = data["entries"] if "entries" in data else [data]
-
-        message = f"[Added {data['title']} to the Queue.{'' if len(data_list) == 1 else f'({len(data_list)} songs)'}]"
+        song_count = data["playlist_count"] if "playlist_count" in data else 1
+        message = f"[Added {data['title']} to the Queue.{'' if song_count == 1 else f'({song_count} songs)'}]"
         await ctx.send(f'```ini\n{message}\n```')
 
-        return [
-            {'webpage_url': item['webpage_url'], 'requester': ctx.author, 'title': item['title']}
-            for item in data_list
-        ]
+        return data_list
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
@@ -76,7 +77,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         loop = loop or asyncio.get_event_loop()
         requester = data['requester']
 
-        to_run = partial(ytdl.extract_info, url=data['webpage_url'], download=False)
+        to_run = partial(ytdl.extract_info, url=data['url'], download=False)
         data = await loop.run_in_executor(None, to_run)
 
         return cls(discord.FFmpegPCMAudio(data['url'], **ffmpeg_options), data=data, requester=requester)

@@ -1,22 +1,14 @@
 import asyncio
-import os
-from datetime import datetime
+import logging
 
 from async_timeout import timeout
 
 from YTDLSource import YTDLSource
 
-
-if not os.path.exists("logs"):
-    os.mkdir("logs")
-MUSIC_LOGS_FILENAME = "logs/music_logs.txt"
-with open(MUSIC_LOGS_FILENAME, "w"):  # clear file
-    pass
-
-
-def music_log(*items):
-    with open(MUSIC_LOGS_FILENAME, "a") as log_file:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), *items, file=log_file)
+logging.basicConfig(
+    filename="log.txt", filemode='a',
+    datefmt='%Y-%m-%dT%H:%M:%S',
+)
 
 
 class MusicPlayer:
@@ -55,7 +47,7 @@ class MusicPlayer:
                     async with timeout(5 * 60):  # 5 minutes
                         source = await self.queue.get()
                 except asyncio.TimeoutError:
-                    music_log("Timed out while waiting for next song in queue, disconnecting")
+                    logging.info("Timed out while waiting for next song in queue, disconnecting")
                     return self.destroy(self._guild)
 
                 if not isinstance(source, YTDLSource):
@@ -77,7 +69,8 @@ class MusicPlayer:
                                              f'```css\n[{e}]\n```')
                     continue
 
-            self._guild.voice_client.play(self.current, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            self._guild.voice_client.play(self.current,
+                                          after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
 
