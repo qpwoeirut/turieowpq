@@ -2,10 +2,7 @@ import asyncio
 from functools import partial
 
 import discord
-import youtube_dl
-
-# Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ''
+import yt_dlp
 
 
 ytdl_format_options = {
@@ -30,7 +27,7 @@ ffmpeg_options = {
     "before_options": "-nostdin -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
 }
 
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):

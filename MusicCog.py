@@ -1,9 +1,10 @@
-import discord
-from discord.ext import commands
-
 import asyncio
 import itertools
 import traceback
+
+import discord
+from discord.ext import commands
+from discord.ext.commands import Context
 
 from MusicPlayer import MusicPlayer, music_log, MUSIC_LOGS_FILENAME
 from YTDLSource import YTDLSource
@@ -28,7 +29,7 @@ class MusicCog(commands.Cog):
         self.player = None
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: Context, error):
         """A local error handler for all errors arising from commands in this cog"""
         try:
             if isinstance(error, commands.NoPrivateMessage):
@@ -46,7 +47,7 @@ class MusicCog(commands.Cog):
         except discord.HTTPException:
             pass
 
-    def get_player(self, ctx):
+    def get_player(self, ctx: Context):
         """Retrieve the music player, or generate one"""
         if self.player is None:
             self.player = MusicPlayer(ctx)
@@ -54,7 +55,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
-    async def join(self, ctx, *, channel: discord.VoiceChannel = None):
+    async def join(self, ctx: Context, *, channel: discord.VoiceChannel = None):
         """Join your current voice channel
         Parameters
         ------------
@@ -86,7 +87,7 @@ class MusicCog(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
-    async def _play(self, ctx, search: str):
+    async def _play(self, ctx: Context, search: str):
         player = self.get_player(ctx)
 
         # each source is a dict which will be used later to regather the stream
@@ -96,7 +97,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='play')
-    async def play(self, ctx, *, search: str):
+    async def play(self, ctx: Context, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
         Uses YTDL to automatically search and retrieve a song.
@@ -108,7 +109,7 @@ class MusicCog(commands.Cog):
         """
         music_log(f"playing from search: {search}")
 
-        await ctx.trigger_typing()
+        await ctx.typing()
 
         if not ctx.voice_client:
             await ctx.invoke(self.join)
@@ -117,7 +118,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name="preset", aliases=["ts", "taylor", "the_score", "taylor_swift"])
-    async def preset(self, ctx, *, search: str):
+    async def preset(self, ctx: Context, *, search: str):
         """Play a song or playlist from a preset list
         Parameters
         ------------
@@ -126,6 +127,7 @@ class MusicCog(commands.Cog):
             The song to retrieve from a lookup list in preset.py (case insensitive)
         """
         music_log(f"playing from preset: {search}")
+        print(type(ctx))
 
         presets = TAYLOR_SWIFT | THE_SCORE
 
@@ -133,7 +135,7 @@ class MusicCog(commands.Cog):
             await ctx.send("Search not found!")
             return
 
-        await ctx.trigger_typing()
+        await ctx.typing()
 
         if not ctx.voice_client:
             await ctx.invoke(self.join)
@@ -142,7 +144,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='pause')
-    async def pause(self, ctx):
+    async def pause(self, ctx: Context):
         """Pause the currently playing song"""
         vc = ctx.voice_client
 
@@ -156,7 +158,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='resume')
-    async def resume(self, ctx):
+    async def resume(self, ctx: Context):
         """Resume the currently paused song"""
         vc = ctx.voice_client
 
@@ -170,7 +172,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='skip')
-    async def skip(self, ctx):
+    async def skip(self, ctx: Context):
         """Skip the song"""
         vc = ctx.voice_client
 
@@ -187,7 +189,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name="loop", aliases=["qloop", "loopq", "loop_queue", "loopqueue"])
-    async def loop_queue(self, ctx):
+    async def loop_queue(self, ctx: Context):
         """Add a song to the end of the queue when it ends or is skipped"""
         player = self.get_player(ctx)
         player.loop_queue = not player.loop_queue
@@ -195,7 +197,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name="loop_song", aliases=["sloop", "loops", "loopsong"])
-    async def loop_song(self, ctx):
+    async def loop_song(self, ctx: Context):
         """Loop the current song"""
         player = self.get_player(ctx)
         player.loop_song = not player.loop_song
@@ -203,7 +205,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
-    async def queue_info(self, ctx):
+    async def queue_info(self, ctx: Context):
         """Retrieve a basic queue of upcoming songs"""
         vc = ctx.voice_client
 
@@ -224,7 +226,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='now_playing', aliases=['np', "nowplaying", 'current', 'currentsong', 'playing'])
-    async def now_playing(self, ctx):
+    async def now_playing(self, ctx: Context):
         """Display information about the currently playing song."""
         vc = ctx.voice_client
 
@@ -241,7 +243,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
-    async def change_volume(self, ctx, *, volume: float):
+    async def change_volume(self, ctx: Context, *, volume: float):
         """Change the player volume
         Parameters
         ------------
@@ -269,7 +271,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name="disconnect", aliases=["dc", "stop", "leave", "bye"])
-    async def disconnect(self, ctx):
+    async def disconnect(self, ctx: Context):
         """Stop the currently playing song and destroy the player
         """
         vc = ctx.voice_client
@@ -287,11 +289,11 @@ class MusicCog(commands.Cog):
         self.player = None
 
     @commands.command(name="dump_logs")
-    async def dump_logs(self, ctx):
+    async def dump_logs(self, ctx: Context):
         with open(MUSIC_LOGS_FILENAME) as log_file:
             logs = log_file.read()
         await ctx.send(f"```\n{logs[-1990:]}\n```")
 
     @commands.command(name="ping")
-    async def ping(self, ctx):
+    async def ping(self, ctx: Context):
         await ctx.send(f"Latency: {round(self.bot.latency * 1000)}ms")
