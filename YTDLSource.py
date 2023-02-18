@@ -78,6 +78,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         requester = data['requester']
 
         to_run = partial(ytdl.extract_info, url=data['url'], download=False)
-        data = await loop.run_in_executor(None, to_run)
+        regathered_data = await loop.run_in_executor(None, to_run)
+        regathered_data["title"] = data["title"]
 
-        return cls(discord.FFmpegPCMAudio(data['url'], **ffmpeg_options), data=data, requester=requester)
+        return cls(discord.FFmpegPCMAudio(regathered_data['url'], **ffmpeg_options),
+                   data=regathered_data, requester=requester)
