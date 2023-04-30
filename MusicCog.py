@@ -95,7 +95,7 @@ class MusicCog(commands.Cog):
         presets = TAYLOR_SWIFT | THE_SCORE
 
         if search.lower() in presets.keys():
-            await self._play(ctx, presets[search])
+            return await self._play(ctx, presets[search])
         elif all([s in presets or s.replace('_', ' ') in presets for s in search.split()]):
             for s in search.split():
                 s = presets[s] if s in presets else presets[s.replace('_', ' ')]
