@@ -1,6 +1,7 @@
 import asyncio
 import itertools
 import logging
+import random
 import traceback
 from collections import deque
 
@@ -110,6 +111,11 @@ class MusicPlayer:
 
     def queue_size(self) -> int:
         return len(self._queue)
+
+    def shuffle_songs(self):
+        to_shuffle = list(self._queue)  # deques have O(n) access, so convert to list before shuffling
+        random.shuffle(to_shuffle)
+        self._queue = deque(to_shuffle)
 
     def destroy(self, guild):
         """Disconnect and cleanup the player."""

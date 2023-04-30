@@ -34,11 +34,11 @@ class MusicCog(commands.Cog):
         """A local error handler for all errors arising from commands in this cog"""
         try:
             if isinstance(error, commands.NoPrivateMessage):
-                await ctx.send('This command can not be used in DMs')
+                await ctx.send('This command can not be used in DMs.')
             elif isinstance(error, InvalidVoiceChannel):
-                await ctx.send('invalid voice channel!')
+                await ctx.send('Invalid voice channel!')
             elif isinstance(error, commands.CommandNotFound):
-                await ctx.send('invalid command!')
+                await ctx.send('Invalid command!')
             else:
                 logging.exception(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
                 await ctx.channel.send(f"Error:\n```css\n[{error}]\n```")
@@ -111,7 +111,7 @@ class MusicCog(commands.Cog):
             return
 
         vc.pause()
-        await ctx.send(f'**`{ctx.author}`**: Paused the song!')
+        await ctx.send(f'**`{ctx.author}`**: Paused')
 
     @commands.guild_only()
     @commands.command(name='resume')
@@ -143,7 +143,7 @@ class MusicCog(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Skipped `{skipped_title}`')
 
     @commands.guild_only()
-    @commands.command(name='remove', aliases=["pop"])
+    @commands.command(name='remove', aliases=["pop", "delete"])
     async def remove(self, ctx: Context, index: int):
         """Removes a song from the queue"""
 
@@ -152,12 +152,21 @@ class MusicCog(commands.Cog):
         await ctx.send(f"**`{ctx.author}`**: Removed `{deleted.title}`")
 
     @commands.guild_only()
+    @commands.command(name='shuffle')
+    async def shuffle(self, ctx: Context):
+        """Shuffles queue"""
+
+        player = self.get_player(ctx)
+        player.shuffle_songs()
+        await ctx.send(f"**`{ctx.author}`**: Shuffled queue")
+
+    @commands.guild_only()
     @commands.command(name="loop", aliases=["qloop", "loopq", "loop_queue", "loopqueue"])
     async def loop_queue(self, ctx: Context):
         """Add a song to the end of the queue when it ends or is skipped"""
         player = self.get_player(ctx)
         player.loop_queue = not player.loop_queue
-        await ctx.send(f"**`{ctx.author}`**: Looping queue **{'enabled' if player.loop_queue else 'disabled'}**!")
+        await ctx.send(f"**`{ctx.author}`**: Looping queue **{'enabled' if player.loop_queue else 'disabled'}**")
 
     @commands.guild_only()
     @commands.command(name="loop_song", aliases=["sloop", "loops", "loopsong"])
@@ -165,7 +174,7 @@ class MusicCog(commands.Cog):
         """Loop the current song"""
         player = self.get_player(ctx)
         player.loop_song = not player.loop_song
-        await ctx.send(f"**`{ctx.author}`**: Looping song **{'enabled' if player.loop_song else 'disabled'}**!")
+        await ctx.send(f"**`{ctx.author}`**: Looping song **{'enabled' if player.loop_song else 'disabled'}**")
 
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
