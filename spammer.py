@@ -58,4 +58,4 @@ async def spam(message):
         reply = ' '.join(words)
     else:
         return
-    await message.channel.send(reply, allowed_mentions=discord.AllowedMentions.none())
+    await message.channel.send(reply)

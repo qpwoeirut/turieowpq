@@ -46,7 +46,7 @@ class MusicCog(commands.Cog):
                 with open("log.txt", "a") as log_file:
                     traceback.print_exception(type(error), error, error.__traceback__, file=log_file)
 
-                await ctx.send(f"Error: {error}", allowed_mentions=discord.AllowedMentions.none())
+                await ctx.send(f"Error: {error}")
         except discord.HTTPException:
             pass
 

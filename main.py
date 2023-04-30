@@ -11,7 +11,7 @@ from spammer import spam
 client = commands.Bot(
     command_prefix=commands.when_mentioned_or("turi "),
     description='turieowpq',
-    allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
+    allowed_mentions=discord.AllowedMentions.none(),
     # intents=discord.Intents(message_content=True, messages=True, voice_states=True, guilds=True)
     intents=discord.Intents().all()
 )
