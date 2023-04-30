@@ -1,3 +1,5 @@
+# based on https://github.com/Rapptz/discord.py/blob/v2.2.2/examples/basic_voice.py
+
 import asyncio
 import itertools
 import logging
@@ -57,36 +59,7 @@ class MusicCog(commands.Cog):
     @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
     async def join(self, ctx: Context, *, channel: discord.VoiceChannel = None):
-        """Join your current voice channel
-        Parameters
-        ------------
-        ctx: context
-        channel: discord.VoiceChannel [Optional]
-            The channel to connect to. If a channel is not specified, an attempt to join the voice channel you are in
-            will be made.
-        This command also handles moving the bot to different channels.
-        """
-        logging.info(f"joining voice channel {channel}")
-        if not channel:
-            try:
-                channel = ctx.author.voice.channel
-            except AttributeError:
-                raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
-
-        vc = ctx.voice_client
-
-        if vc:
-            if vc.channel.id == channel.id:
-                return
-            try:
-                await vc.move_to(channel)
-            except asyncio.TimeoutError:
-                raise VoiceConnectionError(f'Moving to channel: <{channel}> timed out.')
-        else:
-            try:
-                await channel.connect()
-            except asyncio.TimeoutError:
-                raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
+        await self._join(ctx, channel=channel)
 
     async def _play(self, ctx: Context, search: str):
         player = self.get_player(ctx)
@@ -112,11 +85,6 @@ class MusicCog(commands.Cog):
         """
         logging.info(f"playing from search: {search}")
 
-        await ctx.typing()
-
-        if not ctx.voice_client:
-            await ctx.invoke(self.join)
-
         await self._play(ctx, search)
 
     @commands.guild_only()
@@ -134,13 +102,7 @@ class MusicCog(commands.Cog):
         presets = TAYLOR_SWIFT | THE_SCORE
 
         if search.lower() not in presets.keys():
-            await ctx.send("Search not found!")
-            return
-
-        await ctx.typing()
-
-        if not ctx.voice_client:
-            await ctx.invoke(self.join)
+            return await ctx.send("Search not found!")
 
         await self._play(ctx, presets[search])
 
@@ -207,7 +169,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
-    async def queue_info(self, ctx: Context):
+    async def get_queue(self, ctx: Context):
         """Retrieve a basic queue of upcoming songs"""
         vc = ctx.voice_client
 
@@ -245,7 +207,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='volume', aliases=['vol'])
-    async def change_volume(self, ctx: Context, *, volume: float):
+    async def volume(self, ctx: Context, *, volume: float):
         """Change the player volume
         Parameters
         ------------
@@ -253,11 +215,6 @@ class MusicCog(commands.Cog):
         volume: float or int [Required]
             The volume to set the player to in percentage. This must be between 1 and 100.
         """
-        vc = ctx.voice_client
-
-        if not vc or not vc.is_connected():
-            await ctx.send('I am not currently connected to voice!')
-            return
 
         if not 1 <= volume <= 100:
             await ctx.send('Volume should be between 1 and 100')
@@ -265,10 +222,10 @@ class MusicCog(commands.Cog):
 
         player = self.get_player(ctx)
 
-        if vc.source:
-            vc.source.volume = volume / 100
+        if ctx.voice_client.source:  # set volume for current song
+            ctx.voice_client.source.volume = volume / 100
 
-        player.volume = volume / 100
+        player.volume = volume / 100  # set volume for future songs
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{volume}%**')
 
     @commands.guild_only()
@@ -276,20 +233,42 @@ class MusicCog(commands.Cog):
     async def disconnect(self, ctx: Context):
         """Stop the currently playing song and destroy the player
         """
-        vc = ctx.voice_client
-
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!')
-
         await self.cleanup(ctx.guild)
 
-    async def cleanup(self, guild):
+    @staticmethod
+    async def cleanup(guild):
         try:
             await guild.voice_client.disconnect()
             await guild.voice_client.cleanup()
         except AttributeError:
             pass
-        self.player = None
+
+    @play.before_invoke
+    @preset.before_invoke
+    async def _join(self, ctx: Context, *, channel: discord.VoiceChannel = None):
+        if not channel:
+            try:
+                channel = ctx.author.voice.channel
+            except AttributeError:
+                raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
+
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(channel)
+
+        await channel.connect()
+
+    @pause.before_invoke
+    @resume.before_invoke
+    @skip.before_invoke
+    @loop_queue.before_invoke
+    @loop_song.before_invoke
+    @get_queue.before_invoke
+    @now_playing.before_invoke
+    @volume.before_invoke
+    @disconnect.before_invoke
+    async def assert_voice(self, ctx):
+        if ctx.voice_client is None:
+            raise InvalidVoiceChannel("You are not connected to a voice channel.")
 
     @commands.command(name="dump_logs")
     async def dump_logs(self, ctx: Context):
