@@ -6,6 +6,8 @@ import discord
 import yt_dlp
 from discord.ext.commands import Context
 
+from SongInfo import SongInfo
+
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
@@ -71,18 +73,17 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return data_list
 
     @classmethod
-    async def regather_stream(cls, data, *, loop):
+    async def regather_stream(cls, data: SongInfo, *, loop):
         """Used for preparing a stream, instead of downloading.
         Since YouTube Streaming links expire."""
         loop = loop or asyncio.get_event_loop()
-        requester = data['requester']
 
-        to_run = partial(ytdl.extract_info, url=data['url'], download=False)
+        to_run = partial(ytdl.extract_info, url=data.url, download=False)
         regathered_data = await loop.run_in_executor(None, to_run)
-        regathered_data["title"] = data["title"]
+        regathered_data["title"] = data.title
 
         return cls(discord.FFmpegPCMAudio(regathered_data['url'], **ffmpeg_options),
-                   data=regathered_data, requester=requester)
+                   data=regathered_data, requester=data.requester)
 
 
 def main():

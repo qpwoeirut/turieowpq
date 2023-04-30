@@ -1,7 +1,5 @@
 # based on https://github.com/Rapptz/discord.py/blob/v2.2.2/examples/basic_voice.py
 
-import asyncio
-import itertools
 import logging
 import traceback
 
@@ -9,7 +7,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from MusicPlayer import MusicPlayer
+from MusicPlayer import MusicPlayer, SongInfo
 from YTDLSource import YTDLSource
 from preset import TAYLOR_SWIFT, THE_SCORE
 
@@ -42,11 +40,8 @@ class MusicCog(commands.Cog):
             elif isinstance(error, commands.CommandNotFound):
                 await ctx.send('invalid command!')
             else:
-                logging.info(f'Ignoring exception in command {ctx.command}:')
-                with open("log.txt", "a") as log_file:
-                    traceback.print_exception(type(error), error, error.__traceback__, file=log_file)
-
-                await ctx.send(f"Error: {error}")
+                logging.exception(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+                await ctx.channel.send(f"Error:\n```css\n[{error}]\n```")
         except discord.HTTPException:
             pass
 
@@ -67,9 +62,7 @@ class MusicCog(commands.Cog):
         # each source is a dict which will be used later to regather the stream
         sources = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
         for source in sources:
-            await player.queue.put({
-                'url': source['url'], 'requester': ctx.author, 'title': source['title']
-            })
+            player.add_song(SongInfo(url=source['url'], requester=ctx.author, title=source['title']))
 
     @commands.guild_only()
     @commands.command(name='play')
@@ -169,7 +162,7 @@ class MusicCog(commands.Cog):
 
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
-    async def get_queue(self, ctx: Context):
+    async def get_queue(self, ctx: Context, *, page: int = 1):
         """Retrieve a basic queue of upcoming songs"""
         vc = ctx.voice_client
 
@@ -177,14 +170,20 @@ class MusicCog(commands.Cog):
             return await ctx.send('I am not currently connected to voice!')
 
         player = self.get_player(ctx)
-        if player.queue.empty():
+        if not player.pending.is_set():
             return await ctx.send('There are currently no more queued songs.')
 
-        # Grab up to 15 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 15))
+        page_count = (player.queue_size() // 10) + 1
+        if page >= page_count:
+            return await ctx.send(f"There are only {page_count} pages.")
 
-        fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
-        embed = discord.Embed(title=f'Next {len(upcoming)} songs (out of {player.queue.qsize()})', description=fmt)
+        start = (page - 1) * 10
+        upcoming = player.get_songs(10, start)
+        desc = '\n'.join(f"{start + i + 1}. {song.title}" for i, song in enumerate(upcoming))
+        embed = discord.Embed(
+            title=f"Page {page} of {page_count} ({player.queue_size()} total)",
+            description=f"```{desc}```"
+        )
 
         await ctx.send(embed=embed)
 
