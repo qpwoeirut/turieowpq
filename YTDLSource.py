@@ -83,3 +83,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         return cls(discord.FFmpegPCMAudio(regathered_data['url'], **ffmpeg_options),
                    data=regathered_data, requester=requester)
+
+
+def main():
+    ytdl.extract_info("https://www.youtube.com/playlist?list=PLKwS6yNh-76kw73M6DhBiRwxtNbtKLPEm", download=True)
+
+
+if __name__ == "__main__":
+    main()
