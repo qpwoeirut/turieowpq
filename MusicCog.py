@@ -27,7 +27,7 @@ class MusicCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.player = None
+        self._player = None
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: Context, error):
@@ -47,9 +47,9 @@ class MusicCog(commands.Cog):
 
     def get_player(self, ctx: Context):
         """Retrieve the music player, or generate one"""
-        if self.player is None:
-            self.player = MusicPlayer(ctx)
-        return self.player
+        if self._player is None:
+            self._player = MusicPlayer(ctx)
+        return self._player
 
     @commands.guild_only()
     @commands.command(name='join', aliases=['connect'])
@@ -125,24 +125,31 @@ class MusicCog(commands.Cog):
             return
 
         vc.resume()
-        await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
+        await ctx.send(f'**`{ctx.author}`**: Resumed')
 
     @commands.guild_only()
     @commands.command(name='skip')
-    async def skip(self, ctx: Context):
+    async def skip(self, ctx: Context, *, index: int = 0):
         """Skip the song"""
-        vc = ctx.voice_client
-
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!')
-
-        if vc.is_paused():
-            pass
-        elif not vc.is_playing():
+        if not (ctx.voice_client.is_paused() or ctx.voice_client.is_playing()):
+            await ctx.send("Not currently playing anything!")
             return
+        if index != 0:
+            return await self.remove(ctx, index)
 
-        vc.stop()
-        await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
+        player = self.get_player(ctx)
+        skipped_title = player.cur_source.title
+        player.skip()
+        await ctx.send(f'**`{ctx.author}`**: Skipped `{skipped_title}`')
+
+    @commands.guild_only()
+    @commands.command(name='remove', aliases=["pop"])
+    async def remove(self, ctx: Context, index: int):
+        """Removes a song from the queue"""
+
+        player = self.get_player(ctx)
+        deleted = player.delete_song(index - 1)
+        await ctx.send(f"**`{ctx.author}`**: Removed `{deleted.title}`")
 
     @commands.guild_only()
     @commands.command(name="loop", aliases=["qloop", "loopq", "loop_queue", "loopqueue"])
@@ -150,7 +157,7 @@ class MusicCog(commands.Cog):
         """Add a song to the end of the queue when it ends or is skipped"""
         player = self.get_player(ctx)
         player.loop_queue = not player.loop_queue
-        await ctx.send(f"Looping queue **{'enabled' if player.loop_queue else 'disabled'}**!")
+        await ctx.send(f"**`{ctx.author}`**: Looping queue **{'enabled' if player.loop_queue else 'disabled'}**!")
 
     @commands.guild_only()
     @commands.command(name="loop_song", aliases=["sloop", "loops", "loopsong"])
@@ -158,7 +165,7 @@ class MusicCog(commands.Cog):
         """Loop the current song"""
         player = self.get_player(ctx)
         player.loop_song = not player.loop_song
-        await ctx.send(f"Looping song **{'enabled' if player.loop_song else 'disabled'}**!")
+        await ctx.send(f"**`{ctx.author}`**: Looping song **{'enabled' if player.loop_song else 'disabled'}**!")
 
     @commands.guild_only()
     @commands.command(name='queue', aliases=['q', 'playlist'])
@@ -174,8 +181,10 @@ class MusicCog(commands.Cog):
             return await ctx.send('There are currently no more queued songs.')
 
         page_count = (player.queue_size() // 10) + 1
-        if page >= page_count:
+        if page > page_count:
             return await ctx.send(f"There are only {page_count} pages.")
+        if page <= 0:
+            return await ctx.send("Pages are 1-indexed.")
 
         start = (page - 1) * 10
         upcoming = player.get_songs(10, start)

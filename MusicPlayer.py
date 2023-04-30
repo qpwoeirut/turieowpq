@@ -33,6 +33,7 @@ class MusicPlayer:
 
         self.volume = .5
         self.current = None
+        self.cur_source = None
 
         self.loop_song = False
         self.loop_queue = False
@@ -49,13 +50,13 @@ class MusicPlayer:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(5 * 60):  # 5 minutes
                     await self.pending.wait()
-                source = self.pop_song()
+                self.cur_source = self.pop_song()
             except asyncio.TimeoutError:
                 logging.info("Timed out while waiting for next song in queue, disconnecting")
                 return self.destroy(self._guild)
 
             try:
-                self.current = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+                self.current = await YTDLSource.regather_stream(self.cur_source, loop=self.bot.loop)
             except Exception as e:
                 logging.exception(''.join(traceback.format_exception(type(e), e, e.__traceback__)))
                 await self._channel.send(f"Error:\n```css\n[{e}]\n```")
@@ -63,23 +64,26 @@ class MusicPlayer:
 
             self.current.volume = self.volume
 
-            self._guild.voice_client.play(self.current, after=lambda e: self.after(source, e))
+            self._guild.voice_client.play(self.current, after=self.after)
             await self._channel.send(f'**Now Playing:** `{self.current.title}` requested by `{self.current.requester}`')
             await self.next.wait()
 
-    async def after(self, source: SongInfo, e: Exception = None):
+    def after(self, e: Exception = None):
         if e is not None:
             logging.exception(''.join(traceback.format_exception(type(e), e, e.__traceback__)))
-            await self._channel.send(f"Error:\n```css\n[{e}]\n```")
+            self.bot.loop.call_soon_threadsafe(lambda: self._channel.send(f"Error:\n```css\n[{e}]\n```"))
 
         # clean up ffmpeg process
         self.current.cleanup()
 
         if self.loop_song:
-            self.add_song(source, 0)
+            self.add_song(self.cur_source, 0)
         elif self.loop_queue:
-            self.add_song(source)
+            self.add_song(self.cur_source)
         self.bot.loop.call_soon_threadsafe(self.next.set)
+
+    def skip(self):
+        self._guild.voice_client.stop()
 
     def add_song(self, song: SongInfo, index=None):
         if index is None:
@@ -95,6 +99,11 @@ class MusicPlayer:
                 self.pending.clear()
             return ret
         return None
+
+    def delete_song(self, index: int) -> SongInfo:
+        value = self._queue[index]
+        del self._queue[index]
+        return value
 
     def get_songs(self, count: int, start: int = 0) -> list[SongInfo]:
         return list(itertools.islice(self._queue, start, start + count))
