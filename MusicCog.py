@@ -94,10 +94,15 @@ class MusicCog(commands.Cog):
 
         presets = TAYLOR_SWIFT | THE_SCORE
 
-        if search.lower() not in presets.keys():
-            return await ctx.send("Search not found!")
+        if search.lower() in presets.keys():
+            await self._play(ctx, presets[search])
+        elif all([s in presets or s.replace('_', ' ') in presets for s in search.split()]):
+            for s in search.split():
+                s = presets[s] if s in presets else presets[s.replace('_', ' ')]
+                await self._play(ctx, s)
+            return
+        return await ctx.send("Search not found!")
 
-        await self._play(ctx, presets[search])
 
     @commands.guild_only()
     @commands.command(name='pause')
