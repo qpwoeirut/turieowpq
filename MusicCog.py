@@ -257,11 +257,11 @@ class MusicCog(commands.Cog):
         """
         await self.cleanup(ctx.guild)
 
-    @staticmethod
-    async def cleanup(guild):
+    async def cleanup(self, guild):
         try:
             await guild.voice_client.disconnect()
             await guild.voice_client.cleanup()
+            self._player = None
         except AttributeError:
             pass
 
