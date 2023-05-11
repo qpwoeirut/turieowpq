@@ -23,7 +23,7 @@ class InvalidVoiceChannel(VoiceConnectionError):
 class MusicCog(commands.Cog):
     """Music related commands."""
 
-    __slots__ = ('bot', 'player')
+    __slots__ = ('bot', '_player')
 
     def __init__(self, bot):
         self.bot = bot
@@ -223,7 +223,7 @@ class MusicCog(commands.Cog):
         if not player.current:
             return await ctx.send('I am not currently playing anything!')
 
-        current_song_info = f"**Now Playing:** `{vc.source.title}` requested by `{vc.source.requester}`."
+        current_song_info = f"**Now Playing:** `{player.current.title}` requested by `{player.current.requester}`."
         loop_settings_info = f"Looping song: {player.loop_song}. Looping queue: {player.loop_queue}."
         await ctx.send(f"{current_song_info}\n{loop_settings_info}")
 
