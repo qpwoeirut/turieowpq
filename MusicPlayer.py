@@ -76,6 +76,8 @@ class MusicPlayer:
 
         # clean up ffmpeg process
         self.current.cleanup()
+        del self.current
+        self.current = None
 
         if self.loop_song:
             self.add_song(self.cur_source, 0)
@@ -90,7 +92,7 @@ class MusicPlayer:
         if index is None:
             self._queue.append(song)
         else:
-            self._queue.index(song, index)
+            self._queue.insert(index, song)
         self.pending.set()
 
     def pop_song(self):
