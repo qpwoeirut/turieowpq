@@ -45,7 +45,7 @@ class MusicCog(commands.Cog):
         except discord.HTTPException:
             pass
 
-    def get_player(self, ctx: Context):
+    def get_player(self, ctx: Context) -> MusicPlayer:
         """Retrieve the music player, or generate one"""
         if self._player is None:
             self._player = MusicPlayer(ctx)
@@ -155,6 +155,15 @@ class MusicCog(commands.Cog):
         player = self.get_player(ctx)
         deleted = player.delete_song(index - 1)
         await ctx.send(f"**`{ctx.author}`**: Removed `{deleted.title}`")
+
+    @commands.guild_only()
+    @commands.command(name='remove', aliases=["clear"])
+    async def clear_queue(self, ctx: Context):
+        """Removes a song from the queue"""
+
+        player = self.get_player(ctx)
+        player.clear_queue()
+        await ctx.send(f"**`{ctx.author}`**: Cleared queue")
 
     @commands.guild_only()
     @commands.command(name='shuffle')
