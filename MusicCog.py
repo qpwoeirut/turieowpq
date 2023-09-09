@@ -157,7 +157,7 @@ class MusicCog(commands.Cog):
         await ctx.send(f"**`{ctx.author}`**: Removed `{deleted.title}`")
 
     @commands.guild_only()
-    @commands.command(name='remove', aliases=["clear"])
+    @commands.command(name='clear_queue', aliases=["clear"])
     async def clear_queue(self, ctx: Context):
         """Removes a song from the queue"""
 
