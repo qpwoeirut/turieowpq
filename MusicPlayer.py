@@ -104,12 +104,15 @@ class MusicPlayer:
         return None
 
     def delete_song(self, index: int) -> SongInfo:
-        value = self._queue[index]
+        ret = self._queue[index]
         del self._queue[index]
-        return value
+        if len(self._queue) == 0:
+            self.pending.clear()
+        return ret
 
     def clear_queue(self):
         self._queue.clear()
+        self.pending.clear()
 
     def get_songs(self, count: int, start: int = 0) -> list[SongInfo]:
         return list(itertools.islice(self._queue, start, start + count))
