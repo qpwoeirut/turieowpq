@@ -9,6 +9,7 @@ TAYLOR_SWIFT = {
     "folklore": "https://www.youtube.com/playlist?list=OLAK5uy_nWgO-2lNMsx90439Yx0xTWCGIktUc74e8",
     "evermore": "https://www.youtube.com/playlist?list=PLmU8B4gZ41ifO00RpWcvv0vx_UEAyfx8U",
     "midnights": "https://www.youtube.com/playlist?list=PLKwS6yNh-76kw73M6DhBiRwxtNbtKLPEm",
+    "misc": "https://www.youtube.com/playlist?list=PLKwS6yNh-76kWj9t4UbH2W2JPFWPYklYY",
     "fearless original": "https://www.youtube.com/playlist?list=OLAK5uy_kymlVnEd_mmMQfc4GJJPTNOW-ipnOhsrY",
     "speak now original": "https://www.youtube.com/playlist?list=PLKwS6yNh-76mIps4D4mE0N0DsnUCOfSAv",
     "red original": "https://www.youtube.com/playlist?list=OLAK5uy_mwwCV3ci_DoOhgq27DRqnrVG3QOR_S2hQ",
